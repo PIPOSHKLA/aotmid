@@ -91,13 +91,23 @@ from sklearn.preprocessing import StandardScaler
 # ── time series ────────────────────────────────────────────
 from statsmodels.tsa.arima.model import ARIMA as ARIMA_MODEL
 
-# ── deep learning ──────────────────────────────────────────
-from tensorflow import keras
-from tensorflow.keras import layers as kl
+import importlib
 
 warnings.filterwarnings("ignore", category=FutureWarning)
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+_keras = None
+_kl = None
+
+def _lazy_keras():
+    global _keras, _kl
+    if _keras is None:
+        os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+        os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
+        tf = importlib.import_module("tensorflow")
+        _keras = tf.keras
+        importlib.import_module("tensorflow.keras.layers")
+        _kl = tf.keras.layers
+    return _keras, _kl
 
 logger = logging.getLogger("prediction")
 
@@ -640,31 +650,32 @@ class _LSTMWrapper(_BaseModelWrapper):
 
     def __init__(self, **kwargs):
         self._params = kwargs
-        self._model: Optional[keras.Model] = None
+        self._model = None
         self._scaler_y: Optional[StandardScaler] = None
         self._lookback: int = 6
         self._batch_size: int = 16
 
-    def _build_model(self, input_dim: int) -> keras.Model:
+    def _build_model(self, input_dim: int):
+        _k, _l = _lazy_keras()
         units = self._params.get("units", 64)
         dropout = self._params.get("dropout", 0.2)
         lr = self._params.get("learning_rate", 0.001)
 
-        model = keras.Sequential(
+        model = _k.Sequential(
             [
-                kl.LSTM(
+                _l.LSTM(
                     units,
                     return_sequences=True,
                     dropout=dropout,
                     input_shape=(self._lookback, input_dim),
                 ),
-                kl.LSTM(max(units // 2, 8), dropout=dropout),
-                kl.Dense(16, activation="relu"),
-                kl.Dense(1),
+                _l.LSTM(max(units // 2, 8), dropout=dropout),
+                _l.Dense(16, activation="relu"),
+                _l.Dense(1),
             ]
         )
         model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=lr),
+            optimizer=_k.optimizers.Adam(learning_rate=lr),
             loss="mse",
             metrics=["mae"],
         )
@@ -697,14 +708,15 @@ class _LSTMWrapper(_BaseModelWrapper):
             if len(Xv_seq) > 0:
                 val_data = (Xv_seq, yv_seq)
 
+        _k, _ = _lazy_keras()
         callbacks = [
-            keras.callbacks.EarlyStopping(
+            _k.callbacks.EarlyStopping(
                 monitor="val_loss" if val_data else "loss",
                 patience=15,
                 restore_best_weights=True,
                 verbose=0,
             ),
-            keras.callbacks.ReduceLROnPlateau(
+            _k.callbacks.ReduceLROnPlateau(
                 monitor="val_loss" if val_data else "loss",
                 factor=0.5,
                 patience=7,

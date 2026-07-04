@@ -16,14 +16,9 @@ networkx>=3.0
 statsmodels>=0.14.0
 scikit-learn>=1.2.0
 
-# ML
+# ML (lightweight)
 xgboost>=1.7.0
 lightgbm>=4.0.0
-catboost>=1.2.0
-prophet>=1.1.0
-
-# Interpretability
-shap>=0.42.0
 
 # Visualization
 matplotlib>=3.7.0
@@ -33,16 +28,9 @@ plotly>=5.14.0
 # Dashboard
 streamlit>=1.25.0
 
-# Report generation
+# Report
 python-docx>=1.0.0
 
 # Utilities
 loguru>=0.7.0
 joblib>=1.2.0
-
-# Development
-pytest>=7.4.0
-pytest-cov>=4.1.0
-black>=23.0.0
-ruff>=0.1.0
-mypy>=1.5.0
