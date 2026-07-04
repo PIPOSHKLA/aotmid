@@ -1,0 +1,117 @@
+# ──────────────────────────────────────────────────────────────
+# AOT Stock Network — Data Source Configuration
+# ──────────────────────────────────────────────────────────────
+# This file maps logical source names to their official URLs,
+# parameters, and fetch strategies.
+
+sources:
+
+  # ── Stock Exchange of Thailand ────────────────────────────
+  set_aot:
+    institution: "Stock Exchange of Thailand (SET)"
+    category: stock
+    frequency: daily
+    url: "https://marketplace.set.or.th/api/public/oaq-data/security-stat"
+    fetch_strategy: json_api_oaq
+    api_key_env_var: SET_API_KEY
+    data_start_year: 2015
+    official_identifier: "SET:AOT"
+    notes: >
+      Requires API key from SET Marketplace (free registration).
+      Set SET_API_KEY env var, or manually download CSV to data/raw/set_aot/.
+
+  set_index:
+    institution: "Stock Exchange of Thailand (SET)"
+    category: stock
+    frequency: daily
+    url: "https://marketplace.set.or.th/api/public/oaq-data/index-stat"
+    fetch_strategy: json_api_oaq
+    api_key_env_var: SET_API_KEY
+    data_start_year: 2015
+    official_identifier: "SET:SET"
+    notes: >
+      Same API key requirements as set_aot. Uses index-stat endpoint.
+
+  # ── Ministry of Tourism and Sports ────────────────────────
+  mots_tourists:
+    institution: "Ministry of Tourism and Sports (MOTS)"
+    category: tourism
+    frequency: monthly
+    url: "https://www.mots.go.th/more_news.php?cid=595"
+    params:
+      cid: "595"
+    fetch_strategy: excel_download
+    data_start_year: 2015
+    official_identifier: "MOTS:tourist_arrivals"
+    notes: >
+      Monthly Excel files published ~45 days after month-end.
+      If download fails, place manually downloaded file in data/raw/mots_tourists/.
+
+  mots_revenue:
+    institution: "Ministry of Tourism and Sports (MOTS)"
+    category: tourism
+    frequency: monthly
+    url: "https://www.mots.go.th/more_news.php?cid=595"
+    params:
+      cid: "595"
+    fetch_strategy: excel_download
+    data_start_year: 2015
+    official_identifier: "MOTS:tourism_revenue"
+    notes: >
+      Revenue data in same MOTS Excel files as arrivals.
+
+  # ── Bank of Thailand ──────────────────────────────────────
+  bot_usdthb:
+    institution: "Bank of Thailand (BOT)"
+    category: macro
+    frequency: daily
+    url: "https://www.bot.or.th/App/BTWS_STAT/statistics/ReportPage.aspx"
+    params:
+      reportID: "117"
+      language: "en"
+    fetch_strategy: html_table
+    data_start_year: 2015
+    official_identifier: "BOT:FX_USDTHB"
+    notes: >
+      BOT statistics page. HTML table parsing of ASP.NET page.
+      CSV export also available on page.
+
+  bot_policy_rate:
+    institution: "Bank of Thailand (BOT)"
+    category: macro
+    frequency: irregular
+    url: "https://www.bot.or.th/App/BTWS_STAT/statistics/ReportPage.aspx"
+    params:
+      reportID: "191"
+      language: "en"
+    fetch_strategy: html_table
+    data_start_year: 2015
+    official_identifier: "BOT:policy_rate"
+    notes: >
+      MPC meeting history with policy rate decisions.
+
+  bot_inflation:
+    institution: "Bank of Thailand (BOT)"
+    category: macro
+    frequency: monthly
+    url: "https://www.bot.or.th/App/BTWS_STAT/statistics/ReportPage.aspx"
+    params:
+      reportID: "409"
+      language: "en"
+    fetch_strategy: html_table
+    data_start_year: 2015
+    official_identifier: "BOT:CPI"
+    notes: >
+      Monthly CPI figures (headline + core). Base year 2019=100.
+
+  # ── Thailand Open Government Data ─────────────────────────
+  data_go_th:
+    institution: "Digital Government Development Agency (DGA)"
+    category: macro
+    frequency: various
+    url: "https://catalog.data.go.th/api/3/action/datastore_search"
+    fetch_strategy: json_api
+    data_start_year: 2015
+    official_identifier: "DGA:data_go_th"
+    notes: >
+      CKAN API. Requires resource_id in params. No API key needed.

@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aot-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    environment:
+      - SET_API_KEY=${SET_API_KEY:-}
+      - STREAMLIT_SERVER_RUN_ON_SAVE=true
+    restart: unless-stopped

@@ -1,0 +1,125 @@
+[project]
+name = "aot-stock-network"
+version = "0.2.0"
+description = "Social Network Analysis of Factors Influencing AOT Stock Price"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "DDAS Research Team"},
+]
+
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "requests>=2.28.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "openpyxl>=3.1.0",
+    "pyyaml>=6.0",
+    "networkx>=3.0",
+    "scipy>=1.10.0",
+    "matplotlib>=3.7.0",
+    "scikit-learn>=1.2.0",
+    "xgboost>=1.7.0",
+    "streamlit>=1.25.0",
+    "plotly>=5.14.0",
+    "statsmodels>=0.14.0",
+    "loguru>=0.7.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
+
+[project.optional-dependencies]
+ml = [
+    "tensorflow>=2.13.0",
+    "optuna>=3.2.0",
+    "shap>=0.42.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+aot-fetch = "aot_stock_network.cli_runner:fetch"
+aot-train = "aot_stock_network.cli_runner:train"
+aot-preprocess = "aot_stock_network.cli_runner:preprocess"
+aot-run = "aot_stock_network.cli_runner:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"aot_stock_network" = ["py.typed"]
+
+# ── Testing ─────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+minversion = "7.4"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers -p no:cacheprovider"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests requiring network access",
+    "smoke: quick smoke tests for CI",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+    "ignore::UserWarning",
+    # Suppress TensorFlow/Prophet noisy warnings
+    "ignore::pandas.errors.PerformanceWarning",
+]
+
+# ── Coverage ────────────────────────────────────────────────────────────────
+[tool.coverage.run]
+source = ["aot_stock_network"]
+omit = ["*/tests/*", "*/cli/*", "*/__main__*"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING",
+]
+
+# ── Ruff ────────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+ignore = ["E501", "F841", "E402"]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["E501", "F821"]
+
+# ── Mypy ────────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+# ── Black ───────────────────────────────────────────────────────────────────
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+skip-magic-trailing-comma = true
